@@ -9,9 +9,6 @@ spec:
     - http:
         paths:
           - path: /web
-            pathType: Prefix
             backend:
-              service:
-                name: web-svc
-                port:
-                  number: 80
+              serviceName: web-svc
+              servicePort: 8000
