@@ -1,42 +1,38 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: web
 spec:
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 100%
   replicas: 3
   selector:
     matchLabels:
       app: web
   template:
     metadata:
-      name: web
       labels:
         app: web
     spec:
       containers:
         - name: web
-          image: aksemoron/hello_otus
-          volumeMounts:
-            - name: app
-              mountPath: /app
+          image: avtandilko/web:1.0
+          livenessProbe:
+            tcpSocket:
+              port: 8000
           readinessProbe:
             httpGet:
               path: /index.html
               port: 8000
-          livenessProbe:
-            tcpSocket: { port: 8000 }
+          volumeMounts:
+            - name: app
+              mountPath: /app
       initContainers:
-        - name: init-index-page
-          image: busybox:1.31.0
-          command: [ 'sh', '-c', 'wget -O- https://tinyurl.com/otus-k8s-intro | sh' ]
+        - name: html-gen
+          image: busybox:musl
+          command: ['sh', '-c', 'wget -O- https://bit.ly/otus-k8s-index-gen | sh']
           volumeMounts:
             - name: app
               mountPath: /app
       volumes:
         - name: app
-          emptyDir: { }
+          emptyDir: {}
